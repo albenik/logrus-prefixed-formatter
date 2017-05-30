@@ -254,13 +254,21 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 	message := entry.Message
 
 	if prefixValue, ok := entry.Data["prefix"]; ok {
-		prefix = colorScheme.PrefixColor(" " + prefixValue.(string) + ":")
+		prefix = prefixValue.(string)
 	} else {
 		prefixValue, trimmedMsg := extractPrefix(entry.Message)
 		if len(prefixValue) > 0 {
-			prefix = colorScheme.PrefixColor(" " + prefixValue + ":")
+			prefix = prefixValue
 			message = trimmedMsg
 		}
+	}
+
+	if tagValue, ok := entry.Data["tag"]; ok {
+		prefix += "." + tagValue.(string)
+	}
+
+	if prefix != "" {
+		prefix = colorScheme.PrefixColor(" " + prefix + ":")
 	}
 
 	messageFormat := "%s"
@@ -275,14 +283,14 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 		if !f.FullTimestamp {
 			timestamp = fmt.Sprintf("[%04d]", miniTS())
 		} else {
-			timestamp = fmt.Sprintf("[%s]", entry.Time.Format(timestampFormat))
+			timestamp = entry.Time.Format(timestampFormat)
 		}
 		fmt.Fprintf(b, "%s %s%s "+messageFormat, colorScheme.TimestampColor(timestamp), level, prefix, message)
 	}
 	for _, k := range keys {
-		if k != "prefix" {
+		if k != "prefix" && k != "tag" {
 			v := entry.Data[k]
-			fmt.Fprintf(b, " %s=%+v", levelColor(k), v)
+			fmt.Fprintf(b, " %s=%+v", colorScheme.PrefixColor(k), v)
 		}
 	}
 }
