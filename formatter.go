@@ -43,8 +43,8 @@ var (
 	defaultCompiledColorScheme *compiledColorScheme = compileColorScheme(defaultColorScheme)
 )
 
-func miniTS() int {
-	return int(time.Since(baseTimestamp) / time.Second)
+func miniTS() float64 {
+	return time.Since(baseTimestamp).Seconds()
 }
 
 type ColorScheme struct {
@@ -281,7 +281,7 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 	} else {
 		var timestamp string
 		if !f.FullTimestamp {
-			timestamp = fmt.Sprintf("[%04d]", miniTS())
+			timestamp = fmt.Sprintf("[%f]", miniTS())
 		} else {
 			timestamp = entry.Time.Format(timestampFormat)
 		}
